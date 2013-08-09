@@ -76,7 +76,7 @@ def BridgeData(e):
     #todo add functionality for multiple bridges
     try:
         source = e.device
-        savedData.append([e.index,float((getCurrentTime()-startTime)*100), e.value])
+        savedData.append([e.index,float((getCurrentTime()-startTime)*100), e.value,e.device.getSerialNum()])
     except PhidgetException as e:
         print("Phidget Exception %i: %s" % (e.code, e.details))
 

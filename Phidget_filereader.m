@@ -6,7 +6,7 @@
 function [data, rate, gain] =  Phidget_filereader(filename)
 % PHIDGET_FILEREADER Reads csv files outputted by PhidgetLoadCellDataRecorder.py
 %   [data, rate, gain] = Phidget_filereader(filename)
-%   data is the raw array of data in the format [index of the load cell, timestamp, value]
+%   data is the raw array of data in the format [index of the load cell, timestamp, value, serial number of the bridge]
 %   file named should be in the same directory, else filename can be a path
 
 %% File reading and parsing
