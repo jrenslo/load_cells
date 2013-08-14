@@ -134,7 +134,9 @@ def collectMeanVal(bridge,index,msg):
     chr = raw_input("Press enter when ready")
     global savedData
     savedData = []
-    chr = raw_input("Taking Data... (enter to stop)")
+    time = 4
+    print("Taking Data for %i seconds"%time)
+    sleep(time)
     dataPart = savedData[:]
     #print("Disabling %i-%i"%(bridge.getSerialNum(),index))
     bridge.setEnabled(index,False)
@@ -149,7 +151,7 @@ def approveVal(val):
 #Main Program Code
 startTime = getCurrentTime()
 savedData = []
-serialNum = [293138]
+serialNum = [293138] # bridges to test, identified by serial number. 
 gainTable = ['invalid',1,8,16,32,64,128,'unknown']
 gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
 rate = 8
@@ -165,6 +167,10 @@ if dirname not in os.listdir('.'):
 os.chdir(dirname)
 
 filename = 'Phidget_calibration_'+''.join(lNow)+'.csv'
+
+print("Board indicies for reference:")
+print("|0       3|\n|         |\n|1  usb  2|")
+
 weightInKG = raw_input("Enter the weight of the calibration load in KG\n")
 
 try:
@@ -176,6 +182,7 @@ except IOError as e:
 for bridgeNum in serialNum:
     try:
         bridge = openBridge(bridgeNum)
+        #metadata in first row: [gain, datarate]
         f.write(''+str(gainTable[bridge.getGain(0)])+',' \
                 +str(bridge.getDataRateMax())+'\n')
         
@@ -183,7 +190,7 @@ for bridgeNum in serialNum:
             print("Calibrating bridge %i, index %i..."%(bridgeNum,iCell))
             while 1:
                 zero = collectMeanVal(bridge,iCell,"Collecting zero value. Do not add weight")
-                weighted = collectMeanVal(bridge,iCell,"Collecting weighted value. Add weight now")
+                weighted = collectMeanVal(bridge,iCell,"Collecting calibrated value. Add weight now")
                 const = float(weightInKG)/(weighted-zero)
                 if approveVal(const):
                     break
