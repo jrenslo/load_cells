@@ -15,7 +15,7 @@ __date__ ="14-Jan-2011 2:29:14 PM"
 """
 
 #Basic imports
-import sys
+import sys, os
 from time import time as getCurrentTime
 from time import sleep
 from datetime import *
@@ -87,21 +87,25 @@ def BridgeData(e):
 
 #Main Program Code
 
-#todo add calibration option
+#todo add calibration option in another file
 '''
     python calibration script pseudocode
     
-    set up bridge attachment
+    open file
     
-    select index to calibrate
+    loop through all bridges:
     
-    collect data for zero value
+        set up bridge attachment
     
-    collect data for known weight
+        loop through load cells:
     
-    calculate constant
+            collect data for zero value
     
-    output to file
+            collect data for known weight
+    
+            calculate constant
+    
+            output to file (serial, index, constant)
     
     ---
     
@@ -169,7 +173,7 @@ try:
     gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
     gainTable = [1,8,16,32,64,128,'unknown']
     
-    print("Set Gain to %s..." % str(gainTable(gain-1)))
+    print("Set Gain to %s..." % str(gainTable[gain-1]))
     ##  bridge.setGain(0, BridgeGain.PHIDGET_BRIDGE_GAIN_8)
     setGainAllChanels(bridge,gain)
     sleep(2)
@@ -220,6 +224,7 @@ except PhidgetException as e:
     exit(1)
 
 try:
+    serialNum = bridge.getSerialNum()
     bridge.closePhidget()
 except PhidgetException as e:
     print("Phidget Exception %i: %s" % (e.code, e.details))
@@ -233,7 +238,12 @@ print("Done.")
 now = datetime.today().__str__()[:-7]
 lNow = now.split()
 lNow[1:1] = "_"
-filename = 'data/Phidget_test_'+''.join(lNow)+'.csv'
+dirname = 'data/Phidget_test_'+''.join(lNow)
+if dirname not in os.listdir('.'):
+    os.mkdir(dirname)
+os.chdir(dirname)
+
+filename = str(serialNum)+'.csv'
 
 print("Outputting data to file: %s"%(filename))
 try:
@@ -241,7 +251,7 @@ try:
     #f.write('Phidget Test Data\nTaken:,'+now+'\n')
     #f.write('Sensor1,Sensor2,Sensor3,Sensor4\n')
     
-    #first line contains metadata
+    #first line contains metadata: [rate, gain, length of dataset]
     f.write(''+str(options.dataRate)+','+str(gain))
     f.write(',%i' % (len(savedData)))
     f.write('\n')
