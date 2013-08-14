@@ -16,19 +16,22 @@ function out =  readCalibration(filename)
 
 %% File reading and parsing
 
-data = csvread(filename);
+fdata = csvread(filename);
 
 %first row holds metadata
 % [rate, gain, points recorded]
-rate = data(1,1);
-gain = gainTable(data(1,2));
+rate = fdata(1,1);
+gain = fdata(1,2);
 
-data = data(2:end,:);
+fdata = fdata(2:end,:);
 
 %todo parse different indexes and timestamps
-temp.serialNum = data(1,4);
+
 temp.rate = rate;
 temp.gain = gain;
-temp.data = data;
+temp.data = fdata;
+
+temp.getConst = @(serial,index) fdata(fdata(:,1)==serial&fdata(:,2)==index,3);
+
 out = temp;
 end
