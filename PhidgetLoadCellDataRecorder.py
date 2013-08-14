@@ -239,8 +239,8 @@ now = datetime.today().__str__()[:-7]
 lNow = now.split()
 lNow[1:1] = "_"
 dirname = 'data/Phidget_test_'+''.join(lNow)
-if dirname not in os.listdir('.'):
-    os.mkdir(dirname)
+if 'data' not in os.listdir('.') and dirname[5:] not in os.listdir('data'):
+    os.makedirs(dirname)
 os.chdir(dirname)
 
 filename = str(serialNum)+'.csv'
