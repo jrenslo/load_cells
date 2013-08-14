@@ -171,9 +171,9 @@ try:
     sleep(2)
 
     gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
-    gainTable = [1,8,16,32,64,128,'unknown']
+    gainTable = ['invalid',1,8,16,32,64,128,'unknown']
     
-    print("Set Gain to %s..." % str(gainTable[gain-1]))
+    print("Set Gain to %s..." % str(gainTable[gain]))
     ##  bridge.setGain(0, BridgeGain.PHIDGET_BRIDGE_GAIN_8)
     setGainAllChanels(bridge,gain)
     sleep(2)
@@ -252,7 +252,7 @@ try:
     #f.write('Sensor1,Sensor2,Sensor3,Sensor4\n')
     
     #first line contains metadata: [rate, gain, length of dataset]
-    f.write(''+str(options.dataRate)+','+str(gain))
+    f.write(''+str(options.dataRate)+','+str(gainTable[gain]))
     f.write(',%i' % (len(savedData)))
     f.write('\n')
     for row in enumerate(savedData):

@@ -182,9 +182,9 @@ except IOError as e:
 for bridgeNum in serialNum:
     try:
         bridge = openBridge(bridgeNum)
-        #metadata in first row: [gain, datarate]
-        f.write(''+str(gainTable[bridge.getGain(0)])+',' \
-                +str(bridge.getDataRateMax())+'\n')
+        #metadata in first row: [dataRate, gain]
+        f.write(''+str(bridge.getDataRateMax())+',' \
+                +str(gainTable[bridge.getGain(0)])+'\n')
         
         for iCell in range(4):
             print("Calibrating bridge %i, index %i..."%(bridgeNum,iCell))

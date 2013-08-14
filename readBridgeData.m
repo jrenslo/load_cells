@@ -21,7 +21,6 @@ data = csvread(filename);
 %first row holds metadata
 % [rate, gain, points recorded]
 rate = data(1,1);
-gainTable = [1 8 16 32 64 128];
 gain = gainTable(data(1,2));
 expectedPoints = data(1,3);
 
