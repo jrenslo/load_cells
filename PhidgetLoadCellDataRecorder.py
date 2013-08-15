@@ -51,11 +51,11 @@ def setGainAllChanels(device,gain):
 #Event Handler Callback Functions
 def BridgeAttached(e):
     attached = e.device
-    print("Bridge %i Attached!" % (attached.getSerialNum())) if options.verbose
+    if options.verbose: print("Bridge %i Attached!" % (attached.getSerialNum()))
 
 def BridgeDetached(e):
     detached = e.device
-    print("Bridge %i Detached!" % (detached.getSerialNum())) if options.verbose
+    if options.verbose: print("Bridge %i Detached!" % (detached.getSerialNum()))
 
 def BridgeError(e):
     try:
@@ -99,14 +99,18 @@ startTime = getCurrentTime()
 savedData = []
 
 #each bridge is distinguished by a unique serial number
-iBridgeSerials = [293183,293824,293749]
+iBridgeSerials = [293138,293824]
+'''
+   293749 
+    
+'''
 
 #list of bridge objects.  Access serial by lBridges[0].getSerialNum()
 lBridges = []
 
 #loop through bridges creating bridge objects
 for serial in iBridgeSerials:
-    print("---Opening %i...---"%serial) if options.verbose
+    if options.verbose: print("---Opening %i...---"%serial)
     try:
         tempBridge = Bridge()
     except RuntimeError as e:
@@ -130,7 +134,7 @@ for serial in iBridgeSerials:
         print("Exiting....")
         exit(1)
 
-    print("Waiting for attach....") if options.verbose
+    if options.verbose: print("Waiting for attach....")
 
     try:
         tempBridge.waitForAttach(20000)
@@ -146,25 +150,25 @@ for serial in iBridgeSerials:
         exit(1)
     else:
         lBridges.append(tempBridge)
-        displayDeviceInfo(lBridges[len(lBridges-1)]) if options.verbose
+        if options.verbose: displayDeviceInfo(lBridges[len(lBridges)-1])
 
 #Configure settings on each bridge
 for bridge in lBridges:
     print("---Configuring %i...---"%bridge.getSerialNum())
     try:
-        print("Set data rate to %i ms ..." % (int(options.dataRate))) if options.verbose
+        if options.verbose: print("Set data rate to %i ms ..." % (int(options.dataRate)))
         bridge.setDataRate(int(options.dataRate))
         sleep(2)
 
         gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
         gainTable = ['invalid',1,8,16,32,64,128,'unknown']
         
-        print("Set Gain to %s..." % str(gainTable[gain])) if options.verbose
+        if options.verbose: print("Set Gain to %s..." % str(gainTable[gain]))
         ##  bridge.setGain(0, BridgeGain.PHIDGET_BRIDGE_GAIN_8)
         setGainAllChanels(bridge,gain)
         sleep(1)
 
-        print("Enable the Bridge input for reading data...") if options.verbose
+        if options.verbose: print("Enable the Bridge input for reading data...")
         setEnabledAllChannels(bridge,True)
     ##    bridge.setEnabled(0, True)
         ## sleeps briefly so the sensors can configure to take data correctly
@@ -190,16 +194,18 @@ if options.manuallength:
     print("Taking data... (enter to stop)")
     chr = sys.stdin.read(1)
 else:
-    print("Taking data for %i seconds...."% (options.time)) if options.verbose
+    if options.verbose: print("Taking data for %i seconds...."% (options.time))
     sleep(options.time)
+
+dataTaken = savedData[:]
 
 #close all bridges
 for bridge in lBridges:
 
-    print("---Closing %i...---") if options.verbose
+    if options.verbose: print("---Closing %i...---"%bridge.getSerialNum())
 
     try:
-        print("Disable the Bridge input for reading data...") if options.verbose
+        if options.verbose: print("Disable the Bridge input for reading data...")
         setEnabledAllChannels(bridge,False)
         sleep(1)
     except PhidgetException as e:
@@ -220,7 +226,7 @@ for bridge in lBridges:
         print("Exiting....")
         exit(1)
 
-print("Done.") if options.verbose
+if options.verbose: print("Done.")
 
 #save data to file
 
@@ -229,7 +235,7 @@ lNow = now.split()
 lNow[1:1] = "_"
 filename = 'data/Phidget_test_'+''.join(lNow)+'.csv'
 
-print("Outputting data to file: %s"%(filename)) if options.verbose
+if options.verbose: print("Outputting data to file: %s"%(filename))
 try:
     if 'data' not in os.listdir('.'):
         os.mkdir('data')
@@ -238,9 +244,9 @@ try:
     #first line contains metadata: [rate, gain, length of dataset]
     #Matlab can only read csv files with numeric entries
     f.write(''+str(options.dataRate)+','+str(gainTable[gain]))
-    f.write(',%i' % (len(savedData)))
+    f.write(',%i' % (len(dataTaken)))
     f.write('\n')
-    for row in enumerate(savedData):
+    for row in enumerate(dataTaken):
         for entry in row[1]:
             f.write(str(entry)+',')
         f.write('\n')
