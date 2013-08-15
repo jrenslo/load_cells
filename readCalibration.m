@@ -30,7 +30,6 @@ fdata = fdata(2:end,:);
 temp.rate = rate;
 temp.gain = gain;
 temp.data = fdata;
-
 temp.getConst = @(serial,index) fdata(fdata(:,1)==serial&fdata(:,2)==index,3);
 
 out = temp;

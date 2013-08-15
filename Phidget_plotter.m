@@ -8,7 +8,6 @@ close all
 cd('~/Google Drive/Stanford/Work/BDML/Phigets');
 
 
-
 %% File reading and parsing
 
 if ~exist('filename','var')
