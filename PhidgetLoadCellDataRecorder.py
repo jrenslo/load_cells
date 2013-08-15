@@ -25,17 +25,9 @@ from Phidgets.Devices.Bridge import Bridge, BridgeGain
 from optparse import OptionParser
 
 
-#Create a bridge object
-try:
-    bridge = Bridge()
-except RuntimeError as e:
-    print("Runtime Exception: %s" % e.details)
-    print("Exiting....")
-    exit(1)
-
 #Convenience functions
 
-def displayDeviceInfo():
+def displayDeviceInfo(bridge):
     print("|------------|----------------------------------|--------------|------------|")
     print("|- Attached -|-              Type              -|- Serial No. -|-  Version -|")
     print("|------------|----------------------------------|--------------|------------|")
@@ -59,11 +51,11 @@ def setGainAllChanels(device,gain):
 #Event Handler Callback Functions
 def BridgeAttached(e):
     attached = e.device
-    print("Bridge %i Attached!" % (attached.getSerialNum()))
+    print("Bridge %i Attached!" % (attached.getSerialNum())) if options.verbose
 
 def BridgeDetached(e):
     detached = e.device
-    print("Bridge %i Detached!" % (detached.getSerialNum()))
+    print("Bridge %i Detached!" % (detached.getSerialNum())) if options.verbose
 
 def BridgeError(e):
     try:
@@ -73,185 +65,178 @@ def BridgeError(e):
         print("Phidget Exception %i: %s" % (e.code, e.details))
 
 def BridgeData(e):
-    #todo add functionality for multiple bridges
     try:
         source = e.device
-        savedData.append([e.index,float((getCurrentTime()-startTime)*100), e.value,e.device.getSerialNum()])
+        savedData.append([e.index,float((getCurrentTime()-startTime)*1000), e.value,e.device.getSerialNum()])
     except PhidgetException as e:
         print("Phidget Exception %i: %s" % (e.code, e.details))
 
-    #format: [index, timestamp, value]
-
-#print("Bridge %i: Input %i: %f" % (source.getSerialNum(), e.index, e.value))
+    #format: [index, timestamp, value, serial num]
 
 
 #Main Program Code
 
-#todo add calibration option in another file
-'''
-    python calibration script pseudocode
-    
-    open file
-    
-    loop through all bridges:
-    
-        set up bridge attachment
-    
-        loop through load cells:
-    
-            collect data for zero value
-    
-            collect data for known weight
-    
-            calculate constant
-    
-            output to file (serial, index, constant)
-    
-    ---
-    
-    also could add automatically using calibration values 
-    
-    
-'''
+#Set up command line flags
 
 parser = OptionParser()
 parser.add_option("-t", "--time", dest="time",
                   help="duration of test in s", default=10)
+## note, datarate is slightly faster than specified. 
 parser.add_option("-r", "--rate", dest="dataRate",
                   help="duration of test in s", default=100)
 parser.add_option("-m", "--manualtime",dest="manuallength",
                   help="manually end the data collection", default=False, action="store_true")
+parser.add_option("-q", "--quiet",dest="verbose",
+                  help="hide console messages", default=True,
+                  action="store_false")
 (options, args) = parser.parse_args()
 options.dataRate = int(options.dataRate)
 options.time = int(options.time)
 
+#Initialize data storage variables
+
 startTime = getCurrentTime()
 savedData = []
 
+#each bridge is distinguished by a unique serial number
+iBridgeSerials = [293183,293824,293749]
 
-try:
-    bridge.setOnAttachHandler(BridgeAttached)
-    bridge.setOnDetachHandler(BridgeDetached)
-    bridge.setOnErrorhandler(BridgeError)
-    bridge.setOnBridgeDataHandler(BridgeData)
-except PhidgetException as e:
-    print("Phidget Exception %i: %s" % (e.code, e.details))
-    print("Exiting....")
-    exit(1)
+#list of bridge objects.  Access serial by lBridges[0].getSerialNum()
+lBridges = []
 
-print("Opening phidget object....")
-
-try:
-    bridge.openPhidget()
-except PhidgetException as e:
-    print("Phidget Exception %i: %s" % (e.code, e.details))
-    print("Exiting....")
-    exit(1)
-
-print("Waiting for attach....")
-
-try:
-    bridge.waitForAttach(20000)
-except PhidgetException as e:
-    print("Phidget Exception %i: %s" % (e.code, e.details))
+#loop through bridges creating bridge objects
+for serial in iBridgeSerials:
+    print("---Opening %i...---"%serial) if options.verbose
     try:
-        bridge.closePhidget()
+        tempBridge = Bridge()
+    except RuntimeError as e:
+        print("Runtime Exception: %s" % e.details)
+        print("Exiting....")
+        exit(1)
+    try:
+        tempBridge.setOnAttachHandler(BridgeAttached)
+        tempBridge.setOnDetachHandler(BridgeDetached)
+        tempBridge.setOnErrorhandler(BridgeError)
+        tempBridge.setOnBridgeDataHandler(BridgeData)
     except PhidgetException as e:
         print("Phidget Exception %i: %s" % (e.code, e.details))
         print("Exiting....")
         exit(1)
-    print("Exiting....")
-    exit(1)
-else:
-    displayDeviceInfo()
 
-try:
-    print("Set data rate to %i ms ..." % (int(options.dataRate)))
-    bridge.setDataRate(int(options.dataRate))
-    sleep(2)
-
-    gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
-    gainTable = ['invalid',1,8,16,32,64,128,'unknown']
-    
-    print("Set Gain to %s..." % str(gainTable[gain]))
-    ##  bridge.setGain(0, BridgeGain.PHIDGET_BRIDGE_GAIN_8)
-    setGainAllChanels(bridge,gain)
-    sleep(2)
-
-    print("Enable the Bridge input for reading data...")
-    setEnabledAllChannels(bridge,True)
-##    bridge.setEnabled(0, True)
-    sleep(2)
-
-except PhidgetException as e:
-    print("Phidget Exception %i: %s" % (e.code, e.details))
     try:
-        bridge.closePhidget()
+        tempBridge.openPhidget(serial)
     except PhidgetException as e:
         print("Phidget Exception %i: %s" % (e.code, e.details))
         print("Exiting....")
         exit(1)
-    print("Exiting....")
-    exit(1)
 
+    print("Waiting for attach....") if options.verbose
 
+    try:
+        tempBridge.waitForAttach(20000)
+    except PhidgetException as e:
+        print("Phidget Exception %i: %s" % (e.code, e.details))
+        try:
+            tempBridge.closePhidget()
+        except PhidgetException as e:
+            print("Phidget Exception %i: %s" % (e.code, e.details))
+            print("Exiting....")
+            exit(1)
+        print("Exiting....")
+        exit(1)
+    else:
+        lBridges.append(tempBridge)
+        displayDeviceInfo(lBridges[len(lBridges-1)]) if options.verbose
+
+#Configure settings on each bridge
+for bridge in lBridges:
+    print("---Configuring %i...---"%bridge.getSerialNum())
+    try:
+        print("Set data rate to %i ms ..." % (int(options.dataRate))) if options.verbose
+        bridge.setDataRate(int(options.dataRate))
+        sleep(2)
+
+        gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
+        gainTable = ['invalid',1,8,16,32,64,128,'unknown']
+        
+        print("Set Gain to %s..." % str(gainTable[gain])) if options.verbose
+        ##  bridge.setGain(0, BridgeGain.PHIDGET_BRIDGE_GAIN_8)
+        setGainAllChanels(bridge,gain)
+        sleep(1)
+
+        print("Enable the Bridge input for reading data...") if options.verbose
+        setEnabledAllChannels(bridge,True)
+    ##    bridge.setEnabled(0, True)
+        ## sleeps briefly so the sensors can configure to take data correctly
+        sleep(1)
+
+    except PhidgetException as e:
+        print("Phidget Exception %i: %s" % (e.code, e.details))
+        try:
+            bridge.closePhidget()
+        except PhidgetException as e:
+            print("Phidget Exception %i: %s" % (e.code, e.details))
+            print("Exiting....")
+            exit(1)
+        print("Exiting....")
+        exit(1)
+
+## reset data for the test
+startTime = getCurrentTime()
+savedData = []
+
+#sleep while the callback function records data
 if options.manuallength:
     print("Taking data... (enter to stop)")
     chr = sys.stdin.read(1)
 else:
-    print("Taking Data for %i seconds...."% (options.time))
+    print("Taking data for %i seconds...."% (options.time)) if options.verbose
     sleep(options.time)
 
-print("Closing...")
+#close all bridges
+for bridge in lBridges:
 
-try:
-    print("Disable the Bridge input for reading data...")
-    setEnabledAllChannels(bridge,False)
-##    bridge.setEnabled(0, False)
-##    bridge.setEnabled(1, False)
-##    bridge.setEnabled(2, False)
-##    bridge.setEnabled(3, False)
-    sleep(2)
-except PhidgetException as e:
-    print("Phidget Exception %i: %s" % (e.code, e.details))
+    print("---Closing %i...---") if options.verbose
+
+    try:
+        print("Disable the Bridge input for reading data...") if options.verbose
+        setEnabledAllChannels(bridge,False)
+        sleep(1)
+    except PhidgetException as e:
+        print("Phidget Exception %i: %s" % (e.code, e.details))
+        try:
+            bridge.closePhidget()
+        except PhidgetException as e:
+            print("Phidget Exception %i: %s" % (e.code, e.details))
+            print("Exiting....")
+            exit(1)
+        print("Exiting....")
+        exit(1)
+
     try:
         bridge.closePhidget()
     except PhidgetException as e:
         print("Phidget Exception %i: %s" % (e.code, e.details))
         print("Exiting....")
         exit(1)
-    print("Exiting....")
-    exit(1)
 
-try:
-    serialNum = bridge.getSerialNum()
-    bridge.closePhidget()
-except PhidgetException as e:
-    print("Phidget Exception %i: %s" % (e.code, e.details))
-    print("Exiting....")
-    exit(1)
+print("Done.") if options.verbose
 
-print("Done.")
-
-#save to file
+#save data to file
 
 now = datetime.today().__str__()[:-7]
 lNow = now.split()
 lNow[1:1] = "_"
-dirname = 'data/Phidget_test_'+''.join(lNow)
-if 'data' not in os.listdir('.') and dirname[5:] not in os.listdir('data'):
-    os.makedirs(dirname)
-os.chdir(dirname)
+filename = 'data/Phidget_test_'+''.join(lNow)+'.csv'
 
-filename = str(serialNum)+'.csv'
-
-print("Outputting data to file: %s"%(filename))
+print("Outputting data to file: %s"%(filename)) if options.verbose
 try:
+    if 'data' not in os.listdir('.'):
+        os.mkdir('data')
     f = open(filename,'w')
-    #f.write('Phidget Test Data\nTaken:,'+now+'\n')
-    #f.write('Sensor1,Sensor2,Sensor3,Sensor4\n')
-    
+
     #first line contains metadata: [rate, gain, length of dataset]
+    #Matlab can only read csv files with numeric entries
     f.write(''+str(options.dataRate)+','+str(gainTable[gain]))
     f.write(',%i' % (len(savedData)))
     f.write('\n')
@@ -271,8 +256,6 @@ except IndexError as e:
     print("row: %i col: %i" % (row, col))
     f.flush()
 f.close()
-
-
 
 ##run the accompanying matlab script to plot the values
 '''
