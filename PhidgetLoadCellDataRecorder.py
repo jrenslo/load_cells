@@ -99,11 +99,7 @@ startTime = getCurrentTime()
 savedData = []
 
 #each bridge is distinguished by a unique serial number
-iBridgeSerials = [293138,293824]
-'''
-   293749 
-    
-'''
+iBridgeSerials = [293138,293824,293749,293780,293743,293783]
 
 #list of bridge objects.  Access serial by lBridges[0].getSerialNum()
 lBridges = []
@@ -150,7 +146,7 @@ for serial in iBridgeSerials:
         exit(1)
     else:
         lBridges.append(tempBridge)
-        if options.verbose: displayDeviceInfo(lBridges[len(lBridges)-1])
+#        if options.verbose: displayDeviceInfo(lBridges[len(lBridges)-1])
 
 #Configure settings on each bridge
 for bridge in lBridges:
@@ -160,7 +156,7 @@ for bridge in lBridges:
         bridge.setDataRate(int(options.dataRate))
         sleep(2)
 
-        gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
+        gain = BridgeGain.PHIDGET_BRIDGE_GAIN_1
         gainTable = ['invalid',1,8,16,32,64,128,'unknown']
         
         if options.verbose: print("Set Gain to %s..." % str(gainTable[gain]))

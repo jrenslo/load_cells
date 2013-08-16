@@ -14,7 +14,8 @@ function out =  readBridgeData(filename)
 %   struct.rate      - the rate the data was taken (setting may be higher than
 %                       actual rate)
 %   struct.gain      - the gain of the load cell
-%   struct.data      - a matrix of [timestamp,value] readings
+%   struct.time      - vector of timestamps 
+%   struct.data      - vector of readings from the sensor
 %
 %   file named should be in the same directory, else filename can be a path
 
@@ -42,7 +43,8 @@ for serial=unique(data(:,4))'
        temp.index = index-1;
        temp.rate = rate;
        temp.gain = gain;
-       temp.data = data(data(:,1)==index-1,[2 3]);
+       temp.time = data(data(:,1)==index-1&data(:,4)==serial,2);
+       temp.data = data(data(:,1)==index-1&data(:,4)==serial,3);
        out{length(out)+1} = temp;
     end
 end
