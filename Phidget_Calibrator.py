@@ -127,11 +127,10 @@ def openBridge(serialNum):
         displayDeviceInfo(bridge)
     return bridge
 
-def collectMeanVal(bridge,index,msg):
-    print(msg)
+def collectMeanVal(bridge,index):
     #print("Enabling %i-%i"%(bridge.getSerialNum(),index))
     bridge.setEnabled(index,True)
-    chr = raw_input("Press enter when ready")
+    chr = raw_input("Press enter when ready\n")
     global savedData
     savedData = []
     time = 4
@@ -151,7 +150,7 @@ def approveVal(val):
 #Main Program Code
 startTime = getCurrentTime()
 savedData = []
-serialNum = [293138] # bridges to test, identified by serial number. 
+toTest = [293138, 293824] # bridges to test, identified by serial number.
 gainTable = ['invalid',1,8,16,32,64,128,'unknown']
 gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
 rate = 8
@@ -179,24 +178,28 @@ except IOError as e:
     print("error opening file. exiting...")
     exit(1)
 
-for bridgeNum in serialNum:
+#metadata in first row: [dataRate, gain]
+f.write(''+str(rate)+',' \
+          +str(gainTable[gain])+'\n')
+
+for bridgeNum in toTest:
     try:
         bridge = openBridge(bridgeNum)
-        #metadata in first row: [dataRate, gain]
-        f.write(''+str(bridge.getDataRateMax())+',' \
-                +str(gainTable[bridge.getGain(0)])+'\n')
-        
-        for iCell in range(4):
-            print("Calibrating bridge %i, index %i..."%(bridgeNum,iCell))
+        for cellIndex in range(4):
+            print("Calibrating bridge %i, index %i..."%(bridgeNum,cellIndex))
             while 1:
-                zero = collectMeanVal(bridge,iCell,"Collecting zero value. Do not add weight")
-                weighted = collectMeanVal(bridge,iCell,"Collecting calibrated value. Add weight now")
+                print("Collecting zero value. Do not add weight")
+                zero = collectMeanVal(bridge,cellIndex)
+                print("Collecting calibrated value. Add weight now")
+                weighted = collectMeanVal(bridge,cellIndex)
                 const = float(weightInKG)/(weighted-zero)
                 if approveVal(const):
                     break
-                print("Repeating measurment...")
-            f.write(''+str(bridgeNum)+','+str(iCell)+','+str(const)+'\n')
-        f.flush()
+                print("Repeating measurement...")
+            f.write(''+str(bridgeNum)+','+str(cellIndex)+','+str(const)+'\n')
+        print("Closing...")
+        bridge.closePhidget()
+        f.flush()        
     except PhidgetException as e:
         print("Phidget Exception %i: %s" % (e.code, e.details))
         try:
@@ -218,16 +221,7 @@ for bridgeNum in serialNum:
             exit(1)
         exit(1)
 f.close()
-print("Closing...")
-
-try:
-    bridge.closePhidget()
-except PhidgetException as e:
-    print("Phidget Exception %i: %s" % (e.code, e.details))
-    print("Exiting....")
-    exit(1)
 
 print("Output to data/%s"%filename)
-print("Done.")
 
 exit(0)
