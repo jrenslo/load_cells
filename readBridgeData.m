@@ -22,19 +22,21 @@ function out =  readBridgeData(filename)
 
 %% File reading and parsing
 
-data = csvread(filename);
-
+raw = csvread(filename);
 %first row holds metadata
 % [rate, gain, points recorded]
-rate = data(1,1);
-gain = data(1,2);
-expectedPoints = data(1,3);
-raw = data;
+rate = raw(1,1);
+gain = raw(1,2);
+expectedPoints = raw(1,3);
+
+calibData = raw(raw(:,6)==1,:);
+
 
 % data is the raw array of data in the format 
 % [index of the load cell, timestamp, value, serial number of the bridge]
 
-data = data(2:end,:);
+data = raw(2:end,:);
+data = data(data(:,6)~=1,:);
 if(length(data)~=expectedPoints)
     sprintf('CAUTION: lost %i packets reading %s',expectedPoints-length(data),filename); 
 end
@@ -45,8 +47,9 @@ for serial=unique(data(:,4))'
        temp.index = index-1;
        temp.rate = rate;
        temp.gain = gain;
+       temp.tareOffset = mean(calibData(calibData(:,1)==index-1&calibData(:,4)==serial,3));
        temp.time = data(data(:,1)==index-1&data(:,4)==serial,2);
-       temp.data = data(data(:,1)==index-1&data(:,4)==serial,3);
+       temp.data = data(data(:,1)==index-1&data(:,4)==serial,3)-temp.tareOffset;
        temp.raw  = raw;
        out{length(out)+1} = temp;
     end

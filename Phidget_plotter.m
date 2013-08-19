@@ -18,7 +18,7 @@ end
 % the filename is read from the python script running this plotter. to run
 % manually, uncomment and set filename here
 % {
-filename = 'data/Phidget_test_2013-08-19_08:30:53.csv';
+filename = 'data/Phidget_test_2013-08-19_09:13:32.csv';
 %}
 
 % use most recent calibration file.  

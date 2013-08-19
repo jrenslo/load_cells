@@ -23,7 +23,6 @@ from datetime import *
 from Phidgets.PhidgetException import PhidgetException
 from Phidgets.Devices.Bridge import Bridge, BridgeGain
 from optparse import OptionParser
-from PhidgetCalibrator.py import 
 
 
 #Convenience functions
@@ -155,7 +154,7 @@ for bridge in lBridges:
     try:
         if options.verbose: print("Set data rate to %i ms ..." % (int(options.dataRate)))
         bridge.setDataRate(int(options.dataRate))
-        sleep(2)
+        sleep(1)
 
         gain = BridgeGain.PHIDGET_BRIDGE_GAIN_1
         gainTable = ['invalid',1,8,16,32,64,128,'unknown']
@@ -185,9 +184,9 @@ for bridge in lBridges:
 ## take tare data
 print("Taring. Do not load sensors.")
 tareTime = getCurrentTime()
-savedDAta = []
+savedData = []
 sleep(3)
-
+tareData = savedData[:]
 
 ## reset data for the test
 startTime = getCurrentTime()
@@ -250,12 +249,23 @@ try:
     f.write(''+str(options.dataRate)+','+str(gainTable[gain]))
     f.write(',%i' % (len(dataTaken)))
     f.write('\n')
-    for row in enumerate(dataTaken):
+
+    #write test data
+    for row in enumerate(dataTaken): #todo: remove unnneeded enumerate...
         for entry in row[1]:
             f.write(str(entry)+',')
         f.write('\n')
         if row[0]%1000==0:
             f.flush()
+
+    #write tare data
+    for row in enumerate(tareData):
+        for entry in row[1]:
+            f.write(str(entry)+',')
+        f.write(',1,\n')
+        if row[0]%1000==0:
+            f.flush()
+
 except IOError as e:
     print("File error %i %s" % (e.code, e.details))
     print("Exiting.....")
