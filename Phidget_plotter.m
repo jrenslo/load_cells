@@ -14,10 +14,11 @@ if ~exist('filename','var')
     filename = 'data/Phidget_test_2013-08-07_12:40:20.csv';
 end
 
+
 % the filename is read from the python script running this plotter. to run
 % manually, uncomment and set filename here
 % {
-filename = 'data/Phidget_test_2013-08-15_17:35:23.csv';
+filename = 'data/Phidget_test_2013-08-19_08:30:53.csv';
 %}
 
 % use most recent calibration file.  
@@ -34,18 +35,23 @@ fullData = readBridgeData(filename);
 
 plotRaw = true;
 
+serials = [293824 293138 293749 293780 293743 293783];
+
 if plotRaw
-    f1 = figure;
+    %f1 = figure(7);
     hold all
-    labels = {}
+    labels = {};
     for i=1:length(fullData)
-        plot(fullData{i}.time,fullData{i}.data);
+        figure(find(serials==fullData{i}.serialNum));
+        hold all
+        p = plot(fullData{i}.time,fullData{i}.data);
+        title(num2str(fullData{i}.serialNum));
         labels = [labels,[num2str(fullData{i}.serialNum) '-' num2str(fullData{i}.index)]];
     end
-    legend(labels, 'Best');
-    xlabel(['time (s) taken in ', num2str(rate),'ms increments']);
+    %legend(labels, 'Best');
+    xlabel(['time (s) taken in ', num2str(fullData{1}.rate),'ms increments']);
     ylabel('mV/V');
-    title('Raw Phidget Bridge Data');
+   % title('Raw Phidget Bridge Data');
 end
 
 
@@ -55,4 +61,4 @@ f2 = figure;
 
 xlabel(['time (s) taken in ', num2str(fullData{1}.rate),'ms increments']);
 ylabel('kg');
-title('Phidget Bridge Data');
+%title('Phidget Bridge Data');

@@ -1,4 +1,4 @@
-%% Phidget filereader
+    %% Phidget filereader
 % Jon Renslo
 % 8-1-2013
 % Reads files outputted by PhidgetLoadCellDataRecorder.py
@@ -16,6 +16,7 @@ function out =  readBridgeData(filename)
 %   struct.gain      - the gain of the load cell
 %   struct.time      - vector of timestamps 
 %   struct.data      - vector of readings from the sensor
+%   struct.raw       - raw data from the csv file.
 %
 %   file named should be in the same directory, else filename can be a path
 
@@ -28,6 +29,7 @@ data = csvread(filename);
 rate = data(1,1);
 gain = data(1,2);
 expectedPoints = data(1,3);
+raw = data;
 
 % data is the raw array of data in the format 
 % [index of the load cell, timestamp, value, serial number of the bridge]
@@ -45,6 +47,7 @@ for serial=unique(data(:,4))'
        temp.gain = gain;
        temp.time = data(data(:,1)==index-1&data(:,4)==serial,2);
        temp.data = data(data(:,1)==index-1&data(:,4)==serial,3);
+       temp.raw  = raw;
        out{length(out)+1} = temp;
     end
 end

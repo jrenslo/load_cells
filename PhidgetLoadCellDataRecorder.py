@@ -23,6 +23,7 @@ from datetime import *
 from Phidgets.PhidgetException import PhidgetException
 from Phidgets.Devices.Bridge import Bridge, BridgeGain
 from optparse import OptionParser
+from PhidgetCalibrator.py import 
 
 
 #Convenience functions
@@ -180,6 +181,13 @@ for bridge in lBridges:
             exit(1)
         print("Exiting....")
         exit(1)
+
+## take tare data
+print("Taring. Do not load sensors.")
+tareTime = getCurrentTime()
+savedDAta = []
+sleep(3)
+
 
 ## reset data for the test
 startTime = getCurrentTime()
