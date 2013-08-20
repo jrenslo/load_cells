@@ -262,7 +262,7 @@ try:
     for row in enumerate(tareData):
         for entry in row[1]:
             f.write(str(entry)+',')
-        f.write(',1,\n')
+        f.write('1\n')
         if row[0]%1000==0:
             f.flush()
 

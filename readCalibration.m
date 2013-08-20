@@ -25,8 +25,6 @@ gain = fdata(1,2);
 
 fdata = fdata(2:end,:);
 
-%todo parse different indexes and timestamps
-
 temp.rate = rate;
 temp.gain = gain;
 temp.data = fdata;

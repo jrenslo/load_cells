@@ -29,14 +29,14 @@ rate = raw(1,1);
 gain = raw(1,2);
 expectedPoints = raw(1,3);
 
-calibData = raw(raw(:,6)==1,:);
+calibData = raw(raw(:,5)==1,:);
 
 
 % data is the raw array of data in the format 
 % [index of the load cell, timestamp, value, serial number of the bridge]
 
 data = raw(2:end,:);
-data = data(data(:,6)~=1,:);
+data = data(data(:,5)~=1,:);
 if(length(data)~=expectedPoints)
     sprintf('CAUTION: lost %i packets reading %s',expectedPoints-length(data),filename); 
 end
