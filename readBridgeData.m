@@ -48,7 +48,7 @@ for serial=unique(data(:,4))'
        temp.rate = rate;
        temp.gain = gain;
        temp.tareOffset = mean(calibData(calibData(:,1)==index-1&calibData(:,4)==serial,3));
-       temp.time = data(data(:,1)==index-1&data(:,4)==serial,2);
+       temp.time = data(data(:,1)==index-1&data(:,4)==serial,2)/1000;
        temp.data = data(data(:,1)==index-1&data(:,4)==serial,3)-temp.tareOffset;
        temp.raw  = raw;
        out{length(out)+1} = temp;

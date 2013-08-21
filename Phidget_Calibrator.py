@@ -133,7 +133,7 @@ def collectMeanVal(bridge,index):
     chr = raw_input("Press enter when ready\n")
     global savedData
     savedData = []
-    time = 4
+    time = 2
     print("Taking Data for %i seconds"%time)
     sleep(time)
     dataPart = savedData[:]
@@ -150,7 +150,7 @@ def approveVal(val):
 #Main Program Code
 startTime = getCurrentTime()
 savedData = []
-toTest = [293138, 293824] # bridges to test, identified by serial number.
+toTest = [293783, 293743, 293780, 293749, 293138, 293824] # bridges to test, identified by serial number.
 gainTable = ['invalid',1,8,16,32,64,128,'unknown']
 gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
 rate = 8

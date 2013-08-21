@@ -20,7 +20,7 @@ fdata = csvread(filename);
 
 %first row holds metadata
 % [rate, gain, points recorded]
-rate = fdata(1,1);
+rate = fdata(1,1);  
 gain = fdata(1,2);
 
 fdata = fdata(2:end,:);

@@ -90,7 +90,8 @@ parser.add_option("-q", "--quiet",dest="verbose",
                   help="hide console messages", default=True,
                   action="store_false")
 (options, args) = parser.parse_args()
-options.dataRate = int(options.dataRate)
+options.dataRate = (int(options.dataRate)/8)*8
+#rate must be a multiple of 8
 options.time = int(options.time)
 
 #Initialize data storage variables
@@ -152,8 +153,8 @@ for serial in iBridgeSerials:
 for bridge in lBridges:
     print("---Configuring %i...---"%bridge.getSerialNum())
     try:
-        if options.verbose: print("Set data rate to %i ms ..." % (int(options.dataRate)))
         bridge.setDataRate(int(options.dataRate))
+        if options.verbose: print("Set data rate to %i ms ..." % (int(bridge.getDataRate())))
         sleep(1)
 
         gain = BridgeGain.PHIDGET_BRIDGE_GAIN_1
