@@ -18,12 +18,12 @@ end
 % the filename is read from the python script running this plotter. to run
 % manually, uncomment and set filename here
 % {
-filename = 'data/Phidget_test_2013-08-21_10:48:46.csv';
+filename = 'data/Phidget_test_2013-08-21_11:55:54.csv';
 %}
 
 % use most recent calibration file.  
 % Should recalibrate each day data is taken.
-calibFilename = 'data/Phidget_calibration_2013-08-20_15:51:58.csv'; 
+calibFilename = 'data/Phidget_calibration_2013-08-21_11:11:18.csv'; 
 
 fullData = readBridgeData(filename);
 %returns a cell array of structs
@@ -113,8 +113,6 @@ title('Calibrated Force Plot');
 
 % for 3d animated plot, look at patches (and face filled polygons and
 % colormaps) http://www.mathworks.com/help/matlab/ref/patch.html
-
-
 
 
 %{

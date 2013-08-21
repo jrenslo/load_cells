@@ -16,6 +16,7 @@ __date__ ="14-Jan-2011 2:29:14 PM"
 
 #Basic imports
 import sys, os
+from math import floor
 from time import time as getCurrentTime
 from time import sleep
 from datetime import *
@@ -90,7 +91,7 @@ parser.add_option("-q", "--quiet",dest="verbose",
                   help="hide console messages", default=True,
                   action="store_false")
 (options, args) = parser.parse_args()
-options.dataRate = (int(options.dataRate)/8)*8
+options.dataRate = int(floor(options.dataRate/8)*8)
 #rate must be a multiple of 8
 options.time = int(options.time)
 
@@ -148,28 +149,28 @@ for serial in iBridgeSerials:
     else:
         lBridges.append(tempBridge)
 #        if options.verbose: displayDeviceInfo(lBridges[len(lBridges)-1])
-
+sleep(1)
 #Configure settings on each bridge
 for bridge in lBridges:
     print("---Configuring %i...---"%bridge.getSerialNum())
     try:
         bridge.setDataRate(int(options.dataRate))
         if options.verbose: print("Set data rate to %i ms ..." % (int(bridge.getDataRate())))
-        sleep(1)
+        #sleep(1)
 
-        gain = BridgeGain.PHIDGET_BRIDGE_GAIN_1
+        gain = BridgeGain.PHIDGET_BRIDGE_GAIN_8
         gainTable = ['invalid',1,8,16,32,64,128,'unknown']
         
         if options.verbose: print("Set Gain to %s..." % str(gainTable[gain]))
         ##  bridge.setGain(0, BridgeGain.PHIDGET_BRIDGE_GAIN_8)
         setGainAllChanels(bridge,gain)
-        sleep(1)
+        #sleep(1)
 
         if options.verbose: print("Enable the Bridge input for reading data...")
         setEnabledAllChannels(bridge,True)
     ##    bridge.setEnabled(0, True)
         ## sleeps briefly so the sensors can configure to take data correctly
-        sleep(1)
+    #sleep(1)
 
     except PhidgetException as e:
         print("Phidget Exception %i: %s" % (e.code, e.details))
@@ -181,7 +182,7 @@ for bridge in lBridges:
             exit(1)
         print("Exiting....")
         exit(1)
-
+sleep(2)
 ## take tare data
 print("Taring. Do not load sensors.")
 tareTime = getCurrentTime()
@@ -211,7 +212,7 @@ for bridge in lBridges:
     try:
         if options.verbose: print("Disable the Bridge input for reading data...")
         setEnabledAllChannels(bridge,False)
-        sleep(1)
+    #sleep(1)
     except PhidgetException as e:
         print("Phidget Exception %i: %s" % (e.code, e.details))
         try:

@@ -133,7 +133,7 @@ def collectMeanVal(bridge,index):
     chr = raw_input("Press enter when ready\n")
     global savedData
     savedData = []
-    time = 2
+    time = 4
     print("Taking Data for %i seconds"%time)
     sleep(time)
     dataPart = savedData[:]
